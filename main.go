@@ -10,6 +10,7 @@ import (
 	"net/http/httputil"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/stripe/stripe-go/v74"
 	"github.com/stripe/stripe-go/v74/paymentintent"
@@ -81,6 +82,9 @@ func handleCreatePaymentIntent(w http.ResponseWriter, r *http.Request) {
 			Enabled: stripe.Bool(true),
 		},
 	}
+
+	// to avoid double charge
+	params.SetIdempotencyKey(uuid.New().String())
 
 	pi, err := paymentintent.New(params)
 	log.Printf("pi.ClientSecret: %v", pi.ClientSecret)
