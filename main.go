@@ -96,6 +96,7 @@ func handleCreatePaymentIntent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// return the client secret and  the payment intent ID needed to be displayed in the demo app
 	writeJSON(w, struct {
 		ClientSecret    string `json:"clientSecret"`
 		PaymentIntentID string `json:"paymentintentid"`
@@ -123,9 +124,16 @@ func handleListProducts(w http.ResponseWriter, r *http.Request) {
 	// Will only keep products with the metadata "Category" as "Electronics"
 	for _, prod := range products {
 		category := prod.Metadata["Category"]
+		// defining a default image (no-image) if no image has been assigned on Stripe Product
+		image := "https://www.dentee.com/buy/content/images/thumbs/default-image_450.png"
+
 		if category == "Electronics" {
 			price, _ := price.Get(prod.DefaultPrice.ID, nil)
-			d = append(d, Item{prod.ID, prod.Name, price.UnitAmount, prod.Images[0], category})
+			// replace the default image for products with associated images
+			if len(prod.Images) != 0 {
+				image = prod.Images[0]
+			}
+			d = append(d, Item{prod.ID, prod.Name, price.UnitAmount, image, category})
 		}
 	}
 
